@@ -35,7 +35,7 @@ port = 465  # For SSL
 smtp_server = "smtp.gmail.com"
 sender_email = "mountain.project.python@gmail.com"  # Enter your address
 receiver_email = "matteobjornsson@gmail.com"  # Enter receiver address
-p = 'v5i#2HGIVC@j' #input("Type your password and press enter: ")
+p = input("Type your password and press enter: ")
 URL = 'https://www.mountainproject.com/forum/103989416/for-sale-for-free-want-to-buy'
 
 while True:
