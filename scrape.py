@@ -1,5 +1,5 @@
 import requests
-import ssl, pickle, sys
+import ssl, smtplib, pickle, sys
 from bs4 import BeautifulSoup
 from time import sleep
 
@@ -61,21 +61,19 @@ while True:
     search_items = ['cam', 'cams', 'camalot', 'x4', 'c3', 'c4']
 
     posts_with_cams = {post for post in title_and_url if [x for x in search_items if x in post[0].lower()]}
-    new_posts_with_cams = posts_with_cams - previous_posts
+    new_posts_with_cams = title_and_url - previous_posts # change to posts_with_cams - prev posts for relevant postings
     if len(new_posts_with_cams) > 0:
 
         message = """\
         Subject: Current for sale posts that might be selling cams: \n\n"""
         for x in new_posts_with_cams:
             message += x[0] + '\n' + x[1] + '\n' + get_details(x[1]) + '\n'*2
-
         print(message)
-        print(new_posts_with_cams)
         pickle_dump(previous_posts|new_posts_with_cams)
         context = ssl.create_default_context()
-        # with smtplib.SMTP_SSL(smtp_server, port, context=context) as server:
-        #     server.login(sender_email, p)
-        #     server.sendmail(sender_email, receiver_email, message)
+        with smtplib.SMTP_SSL(smtp_server, port, context=context) as server:
+            server.login(sender_email, p)
+            server.sendmail(sender_email, receiver_email, message)
     else:
         print('no new posts')
     sleep(60)
