@@ -1,11 +1,10 @@
 import requests
-import ssl, smtplib, pickle, sys
+import ssl, smtplib, pickle, sys, os
 from bs4 import BeautifulSoup
 from time import sleep
 
 sys.setrecursionlimit(100000)
 
-p = sys.argv[1]
 
 def pickle_dump(to_write) -> None:
     """
@@ -73,7 +72,7 @@ while True:
         pickle_dump(previous_posts|new_posts_with_cams)
         context = ssl.create_default_context()
         with smtplib.SMTP_SSL(smtp_server, port, context=context) as server:
-            server.login(sender_email, p)
+            server.login(sender_email, os.environ['MY_SMTP_P'])
             server.sendmail(sender_email, receiver_email, message)
     else:
         print('no new posts')
