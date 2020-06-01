@@ -58,7 +58,7 @@ while True:
         if title:
             title_and_url.add((title.contents[0], a['href']))
 
-    search_items = ['cam', 'cams', 'camalot', 'x4', 'c3', 'c4']
+    search_items = ['cam', 'cams', 'camalot', 'x4', 'c3', 'c4', '#5', '.4', '.3']
 
     posts_with_cams = {post for post in title_and_url if [x for x in search_items if x in post[0].lower()]}
     new_posts_with_cams = posts_with_cams - previous_posts # change to posts_with_cams - prev posts for relevant postings
