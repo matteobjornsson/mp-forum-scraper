@@ -76,4 +76,4 @@ while True:
             server.sendmail(sender_email, receiver_email, message.encode('utf-8'))
     else:
         print('no new posts')
-    sleep(60)
+    sleep(300)
