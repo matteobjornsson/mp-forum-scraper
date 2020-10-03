@@ -4,6 +4,7 @@ from bs4 import BeautifulSoup
 from time import sleep
 
 sys.setrecursionlimit(100000)
+URL = 'https://www.mountainproject.com/forum/103989416/for-sale-for-free-want-to-buy'
 
 
 def pickle_dump(to_write) -> None:
@@ -20,23 +21,32 @@ def get_details(url: str) -> str:
     soup = BeautifulSoup(page.content, 'html.parser')
     results = soup.find(id='forum-table')
     title_and_url = set()
-    #
+    
+    details = ''
     for a in results.find_all('a', href=True):
         title = a.find('strong')
         if title:
             title_and_url.add((title.contents[0]))
             if len(title_and_url) > 1:
-                details ='Posted ' + title.contents[0]
+                details = 'Posted ' + title.contents[0]
                 break
-
     return details
 
-port = 465  # For SSL
-smtp_server = "smtp.gmail.com"
-sender_email = "mountain.project.python@gmail.com"  # Enter your address
-receiver_email = "matteobjornsson@gmail.com"  # Enter receiver address
-#p = input("Type your password and press enter: ")
-URL = 'https://www.mountainproject.com/forum/103989416/for-sale-for-free-want-to-buy'
+
+def send_email(receiver_email: str, msg: str):
+    context = ssl.create_default_context()
+    port = 465  # For SSL
+    smtp_server = "smtp.gmail.com"
+    sender_email = "mountain.project.python@gmail.com"  # Enter your address
+    with smtplib.SMTP_SSL(smtp_server, port, context=context) as server:
+        server.login(sender_email, os.environ['MY_SMTP_P'])
+        server.sendmail(sender_email, receiver_email, msg.encode('utf-8'))
+
+
+def get_new_matching_posts(posts: set, keywords: list, prev_posts: set) -> set:
+    matching_posts = {post for post in posts if [x for x in keywords if x in post[0].lower()]}
+    return matching_posts - prev_posts
+
 
 while True:
     try:
@@ -59,21 +69,22 @@ while True:
             title_and_url.add((title.contents[0], a['href']))
 
     search_items = ['nomic', 'summit']
+    new_matching_posts = get_new_matching_posts(
+        posts=title_and_url,
+        keywords=search_items,
+        prev_posts=previous_posts
+    )
 
-    posts_with_cams = {post for post in title_and_url if [x for x in search_items if x in post[0].lower()]}
-    new_posts_with_cams = posts_with_cams - previous_posts # change to posts_with_cams - prev posts for relevant postings
-    if len(new_posts_with_cams) > 0:
-
+    if len(new_matching_posts) > 0:
         message = """
         Subject: Current for sale posts that might be selling cams: \n\n"""
-        for x in new_posts_with_cams:
+        for x in new_matching_posts:
             message += x[0] + '\n' + x[1] + '\n' + get_details(x[1]) + '\n'*2
-        print(message)
-        pickle_dump(previous_posts|new_posts_with_cams)
-        context = ssl.create_default_context()
-        with smtplib.SMTP_SSL(smtp_server, port, context=context) as server:
-            server.login(sender_email, os.environ['MY_SMTP_P'])
-            server.sendmail(sender_email, receiver_email, message.encode('utf-8'))
+
+        pickle_dump(previous_posts | new_matching_posts)
+
+        send_email(receiver_email="matteobjornsson@gmail.com", msg=message)
     else:
         print('no new posts')
     sleep(300)
+
