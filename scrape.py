@@ -68,7 +68,7 @@ while True:
         if title:
             title_and_url.add((title.contents[0], a['href']))
 
-    search_items = ['nomic', 'summit']
+    search_items = ['cam', 'cams', 'c4', 'rack']
     new_matching_posts = get_new_matching_posts(
         posts=title_and_url,
         keywords=search_items,
